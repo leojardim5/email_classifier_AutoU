@@ -12,7 +12,10 @@ from app.config.configuracao import CHAVE_API_GEMINI
 # Cria a aplicação FastAPI
 app = FastAPI(
     title="Email Classifier API",
-    description="API para classificação automática de emails usando Inteligência Artificial"
+    description="API para classificação automática de emails usando Inteligência Artificial",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # Handler para erros de validação (422) - DEVE VIR DEPOIS DE CRIAR O APP
@@ -22,26 +25,30 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     errors = []
     for error in exc.errors():
         if error["type"] == "json_invalid":
-            errors.append({
-                "campo": "body",
-                "erro": "JSON inválido. O texto pode conter caracteres especiais ou quebras de linha que precisam ser escapadas.",
-                "detalhe": error.get("ctx", {}).get("error", "Erro ao decodificar JSON"),
-                "solucao": "Use o Swagger UI ou certifique-se de escapar quebras de linha com \\n no JSON"
-            })
+            errors.append(
+                {
+                    "campo": "body",
+                    "erro": "JSON inválido. O texto pode conter caracteres especiais ou quebras de linha que precisam ser escapadas.",
+                    "detalhe": error.get("ctx", {}).get("error", "Erro ao decodificar JSON"),
+                    "solucao": "Use o Swagger UI ou certifique-se de escapar quebras de linha com \\n no JSON",
+                }
+            )
         else:
-            errors.append({
-                "campo": " -> ".join(str(x) for x in error.get("loc", [])),
-                "erro": error.get("msg", "Erro de validação"),
-                "valor_recebido": error.get("input")
-            })
-    
+            errors.append(
+                {
+                    "campo": " -> ".join(str(x) for x in error.get("loc", [])),
+                    "erro": error.get("msg", "Erro de validação"),
+                    "valor_recebido": error.get("input"),
+                }
+            )
+
     return JSONResponse(
         status_code=422,
         content={
             "erro": "Erro de validação",
             "detalhes": errors,
-            "dica": "Se estiver usando curl, certifique-se de que o JSON está bem formatado. Use o Swagger UI (/docs) para testar mais facilmente."
-        }
+            "dica": "Se estiver usando curl, certifique-se de que o JSON está bem formatado. Use o Swagger UI (/docs) para testar mais facilmente.",
+        },
     )
 
 # Configura CORS para permitir requisições do frontend
@@ -56,15 +63,13 @@ app.add_middleware(
 # Registra os routers (endpoints)
 app.include_router(email_router)
 
-
-@app.get("/health")
+# ✅ IMPORTANTE PARA O RENDER:
+# Alguns health checks usam HEAD antes do GET.
+# Se o endpoint não aceitar HEAD, pode voltar 405 e o Render pode reiniciar o serviço.
+@app.api_route("/health", methods=["GET", "HEAD"])
 def verificar_saude():
     """Endpoint para verificar se a API está funcionando"""
-    return {
-        "status": "ok", 
-        "message": "API rodando com sucesso"
-    }
-
+    return {"status": "ok", "message": "API rodando com sucesso"}
 
 @app.get("/")
 def root():
@@ -74,5 +79,5 @@ def root():
         "message": "Bem-vindo à Email Classifier API",
         "docs": "/docs",
         "health": "/health",
-        "api_key_status": api_key_configurada
+        "api_key_status": api_key_configurada,
     }

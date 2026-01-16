@@ -46,6 +46,22 @@ export default function EmailClassifier() {
     );
   };
 
+  // Remove um item do histórico
+  const removeFromHistory = (id: string) => {
+    const updatedHistory = history.filter((item) => item.id !== id);
+    setHistory(updatedHistory);
+    localStorage.setItem(
+      "email-classifier-history",
+      JSON.stringify(updatedHistory)
+    );
+  };
+
+  // Limpa todo o histórico
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem("email-classifier-history");
+  };
+
   const handleClassification = async (text: string, file?: File) => {
     setLoading(true);
     setError(null);
@@ -173,7 +189,11 @@ export default function EmailClassifier() {
       {result && <ResultDisplay result={result} />}
 
       {/* History List */}
-      <HistoryList history={history} />
+      <HistoryList 
+        history={history} 
+        onDeleteItem={removeFromHistory}
+        onClearHistory={clearHistory}
+      />
 
       {/* Info Section */}
       <div className="mt-12 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-8 border border-blue-100">

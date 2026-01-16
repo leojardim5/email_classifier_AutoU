@@ -20,6 +20,7 @@ export interface HistoryItem extends BaseModel {
  */
 export interface HistoryListProps {
   history: HistoryItem[];
+  onDeleteItem?: (id: string) => void;
   onClearHistory?: () => void;
   maxItems?: number;
 }
