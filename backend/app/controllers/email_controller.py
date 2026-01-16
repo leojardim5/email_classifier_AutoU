@@ -1,12 +1,15 @@
 """
 Controlador de Emails - Gerencia os endpoints da API
 """
+import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from pydantic import BaseModel
 from app.models.schemas import RequisicaoEmailTexto, RespostaClassificacao
 from app.services.extrator_servico import extrair_texto_de_arquivo
 from app.services.classificador_servico import classificar_email_com_ia, obter_cliente_gemini
 from app.services.resposta_servico import gerar_resposta_sugerida
+
+logger = logging.getLogger(__name__)
 
 # Cria o router para os endpoints de email
 router = APIRouter(prefix="/api/emails", tags=["Emails"])
@@ -96,25 +99,50 @@ def classificar_texto(payload: RequisicaoEmailTexto):
         "texto": "Olá, gostaria de saber o status da minha requisição"
     }
     """
+    logger.info("=" * 80)
+    logger.info("📧 NOVA REQUISIÇÃO DE CLASSIFICAÇÃO DE TEXTO")
+    logger.info("=" * 80)
+    logger.info(f"Tamanho do texto recebido: {len(payload.texto)} caracteres")
+    logger.debug(f"Texto recebido (primeiros 200 chars): {payload.texto[:200]}...")
+    
     try:
+        logger.info("🔍 PASSO 1: Iniciando classificação do email com IA...")
         # 1. Classifica o email usando IA
         resultado_classificacao = classificar_email_com_ia(payload.texto)
+        logger.info(f"✅ Classificação concluída: {resultado_classificacao.get('label')} (confiança: {resultado_classificacao.get('confidence')})")
+        logger.debug(f"Resultado completo da classificação: {resultado_classificacao}")
         
+        logger.info("💬 PASSO 2: Gerando resposta sugerida com IA...")
         # 2. Gera resposta sugerida personalizada usando IA (baseada no conteúdo do email)
         resposta_sugerida = gerar_resposta_sugerida(resultado_classificacao["label"], payload.texto)
+        logger.info(f"✅ Resposta gerada com sucesso (tamanho: {len(resposta_sugerida)} caracteres)")
+        logger.debug(f"Resposta sugerida: {resposta_sugerida[:200]}...")
         
+        logger.info("📤 PASSO 3: Montando resposta final...")
         # 3. Retorna o resultado
-        return RespostaClassificacao(
+        resultado_final = RespostaClassificacao(
             label=resultado_classificacao["label"],
             confidence=resultado_classificacao["confidence"],
             suggested_reply=resposta_sugerida,
             all_scores=None
         )
-    except HTTPException:
+        logger.info("✅ Requisição processada com SUCESSO!")
+        logger.info("=" * 80)
+        return resultado_final
+    except HTTPException as he:
         # Re-lança exceções HTTP (já estão formatadas)
+        logger.error(f"❌ HTTPException capturada: {he.status_code} - {he.detail}")
+        logger.error("=" * 80)
         raise
     except Exception as e:
         # Captura outros erros inesperados
+        logger.error("=" * 80)
+        logger.error(f"❌ ERRO INESPERADO no endpoint classificar_texto!")
+        logger.error(f"Tipo de exceção: {type(e).__name__}")
+        logger.error(f"Mensagem: {str(e)}")
+        import traceback
+        logger.error(f"Traceback completo:\n{traceback.format_exc()}")
+        logger.error("=" * 80)
         raise HTTPException(
             status_code=500, 
             detail=f"Erro ao processar solicitação: {str(e)}"
