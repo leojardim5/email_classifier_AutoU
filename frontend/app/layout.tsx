@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Email Classifier - Classificação Automática de Emails",
-  description: "Sistema inteligente para classificação automática de emails usando IA",
+  title: "AutoU - Classificação Inteligente de Emails",
+  description: "Intelligence that transforms complexity into competitive advantage. Sistema de classificação automática de emails com IA.",
 };
 
 export default function RootLayout({

@@ -354,7 +354,7 @@ GET /health
 
 ## 🌐 Deploy
 
-### Backend (Render/Railway/Heroku)
+### Backend (Render/Railway)
 
 1. Crie uma conta na plataforma escolhida
 2. Conecte seu repositório GitHub
