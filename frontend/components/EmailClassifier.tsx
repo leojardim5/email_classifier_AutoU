@@ -57,13 +57,13 @@ export default function EmailClassifier() {
         const formData = new FormData();
         formData.append("file", file);
         
-        response = await fetch("/api/emails/classify-file", {
+        response = await fetch("/api/classify-file", {
           method: "POST",
           body: formData,
         });
       } else {
         // Envio de texto
-        response = await fetch("/api/emails/classify-text", {
+        response = await fetch("/api/classify-text", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
