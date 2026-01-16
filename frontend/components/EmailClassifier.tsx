@@ -128,8 +128,8 @@ export default function EmailClassifier() {
         <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-600 rounded-2xl mb-6 shadow-autou transform hover:scale-105 transition-transform">
           <span className="text-white text-4xl">📧</span>
         </div>
-        <h1 className="text-5xl font-bold mb-4 text-autou-gradient">
-          Triagem Inteligente de E-mails (Case AutoU)
+        <h1 className="text-4xl font-bold mb-4 text-autou-gradient">
+          Triagem Inteligente de E-mails AutoU
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Transforme a complexidade do gerenciamento de emails em vantagem

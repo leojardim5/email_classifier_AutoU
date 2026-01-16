@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
+const nunitoSans = Nunito_Sans({ subsets: ["latin"], variable: "--font-nunito-sans" });
 
 export const metadata: Metadata = {
   title: "AutoU - Classificação Inteligente de Emails",
@@ -16,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
+      <body className={`${inter.className} ${nunitoSans.variable}`}>{children}</body>
     </html>
   );
 }

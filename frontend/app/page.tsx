@@ -2,6 +2,7 @@
 
 import EmailClassifier from "@/components/EmailClassifier";
 import AutoUHeader from "@/components/AutoUHeader";
+import AutoULogo from "@/components/AutoULogo";
 
 export default function Home() {
   return (
@@ -16,10 +17,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between text-sm text-gray-600">
             <div className="flex items-center space-x-2 mb-2 sm:mb-0">
-              <div className="w-6 h-6 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xs">A</span>
-              </div>
-              <span className="font-semibold text-gray-700">AutoU</span>
+              <AutoULogo width={120} height={40} />
               <span className="text-gray-400">•</span>
               <span>Intelligence Platform</span>
             </div>
