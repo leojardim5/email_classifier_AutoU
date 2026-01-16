@@ -18,7 +18,6 @@ export default function EmailClassifier() {
     if (savedHistory) {
       try {
         const parsed = JSON.parse(savedHistory);
-        // Converte timestamps para Date
         const historyWithDates = parsed.map((item: any) => ({
           ...item,
           timestamp: new Date(item.timestamp),
@@ -35,13 +34,16 @@ export default function EmailClassifier() {
     const newItem: HistoryItem = {
       id: Date.now().toString(),
       timestamp: new Date(),
-      input: input,
-      result: result,
+      input,
+      result,
     };
 
-    const updatedHistory = [newItem, ...history].slice(0, 20); // Mantém apenas os últimos 20
+    const updatedHistory = [newItem, ...history].slice(0, 20);
     setHistory(updatedHistory);
-    localStorage.setItem("email-classifier-history", JSON.stringify(updatedHistory));
+    localStorage.setItem(
+      "email-classifier-history",
+      JSON.stringify(updatedHistory)
+    );
   };
 
   const handleClassification = async (text: string, file?: File) => {
@@ -50,20 +52,20 @@ export default function EmailClassifier() {
     setResult(null);
 
     try {
-      let response;
-      
+      let response: Response;
+
       if (file) {
         // Upload de arquivo
         const formData = new FormData();
         formData.append("file", file);
-        
-        response = await fetch("/api/classify-file", {
+
+        response = await fetch("/api/emails/classify-file", {
           method: "POST",
           body: formData,
         });
       } else {
         // Envio de texto
-        response = await fetch("/api/classify-text", {
+        response = await fetch("/api/emails/classify-text", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -72,15 +74,28 @@ export default function EmailClassifier() {
         });
       }
 
+      // Trata erro sem assumir JSON (evita "Unexpected token <")
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Erro ao processar email");
+        const contentType = response.headers.get("content-type") || "";
+        const raw = await response.text();
+
+        if (contentType.includes("application/json")) {
+          try {
+            const errorData = JSON.parse(raw);
+            throw new Error(errorData?.detail || "Erro ao processar email");
+          } catch {
+            throw new Error(`Erro ao processar email (HTTP ${response.status})`);
+          }
+        }
+
+        throw new Error(
+          `Erro ao processar email (HTTP ${response.status}): ${raw.slice(0, 200)}`
+        );
       }
 
       const data: ClassificationResult = await response.json();
       setResult(data);
-      
-      // Salva no histórico
+
       const inputText = file ? `Arquivo: ${file.name}` : text;
       saveToHistory(inputText, data);
     } catch (err) {
@@ -98,10 +113,11 @@ export default function EmailClassifier() {
           <span className="text-white text-4xl">📧</span>
         </div>
         <h1 className="text-5xl font-bold mb-4 text-autou-gradient">
-        Triagem Inteligente de E-mails (Case AutoU)
+          Triagem Inteligente de E-mails (Case AutoU)
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-          Transforme a complexidade do gerenciamento de emails em vantagem competitiva com nossa plataforma de IA
+          Transforme a complexidade do gerenciamento de emails em vantagem
+          competitiva com nossa plataforma de IA
         </p>
         <div className="mt-6 flex items-center justify-center space-x-6 text-sm text-gray-500">
           <div className="flex items-center space-x-2">
@@ -121,10 +137,7 @@ export default function EmailClassifier() {
 
       {/* Upload Form */}
       <div className="bg-white rounded-xl shadow-autou border border-gray-100 p-8 mb-8">
-        <UploadForm 
-          onClassify={handleClassification} 
-          loading={loading}
-        />
+        <UploadForm onClassify={handleClassification} loading={loading} />
       </div>
 
       {/* Error Display */}
@@ -132,12 +145,24 @@ export default function EmailClassifier() {
         <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-5 mb-6 shadow-sm">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-6 w-6 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-semibold text-red-800 mb-1">Erro ao processar</h3>
+              <h3 className="text-sm font-semibold text-red-800 mb-1">
+                Erro ao processar
+              </h3>
               <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
@@ -155,8 +180,18 @@ export default function EmailClassifier() {
         <div className="flex items-start space-x-4">
           <div className="flex-shrink-0">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </div>
           </div>
@@ -171,7 +206,9 @@ export default function EmailClassifier() {
                   <span className="font-bold text-green-700">Produtivo</span>
                 </div>
                 <p className="text-sm text-gray-700">
-                  Emails que requerem ação ou resposta específica (ex: solicitações de suporte, atualizações sobre casos, dúvidas sobre o sistema)
+                  Emails que requerem ação ou resposta específica (ex:
+                  solicitações de suporte, atualizações sobre casos, dúvidas
+                  sobre o sistema)
                 </p>
               </div>
               <div className="bg-white/60 rounded-lg p-4 border border-blue-100">
@@ -180,13 +217,17 @@ export default function EmailClassifier() {
                   <span className="font-bold text-orange-700">Improdutivo</span>
                 </div>
                 <p className="text-sm text-gray-700">
-                  Emails que não necessitam ação imediata (ex: mensagens de felicitações, agradecimentos, comunicações informativas)
+                  Emails que não necessitam ação imediata (ex: mensagens de
+                  felicitações, agradecimentos, comunicações informativas)
                 </p>
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-blue-200">
               <p className="text-sm text-gray-700">
-                <strong className="text-gray-900">Nossa IA</strong> analisa o conteúdo do email usando processamento de linguagem natural e sugere uma resposta personalizada baseada no contexto e na categoria identificada.
+                <strong className="text-gray-900">Nossa IA</strong> analisa o
+                conteúdo do email usando processamento de linguagem natural e
+                sugere uma resposta personalizada baseada no contexto e na
+                categoria identificada.
               </p>
             </div>
           </div>
