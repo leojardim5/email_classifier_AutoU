@@ -98,7 +98,7 @@ export default function EmailClassifier() {
           <span className="text-white text-4xl">📧</span>
         </div>
         <h1 className="text-5xl font-bold mb-4 text-autou-gradient">
-          Classificação Inteligente de Emails
+        Triagem Inteligente de E-mails (Case AutoU)
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
           Transforme a complexidade do gerenciamento de emails em vantagem competitiva com nossa plataforma de IA
